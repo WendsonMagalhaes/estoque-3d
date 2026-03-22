@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Produto {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  sku         String   @unique
+  createdAt   DateTime @default(now())
+
+  itensCaixa  ItemCaixa[]
+  movimentacoes Movimentacao[]
+}
+
+model Camara {
+  id            Int    @id @default(autoincrement())
+  nome          String
+
+  largura       Float
+  profundidade  Float
+  altura        Float
+
+  pallets       Pallet[]
+}
+
+model Pallet {
+  id           Int      @id @default(autoincrement())
+  codigo       String
+  camaraId     Int
+  posX         Float
+  posY         Float
+  posZ         Float
+  largura      Float
+  profundidade Float
+  altura       Float
+  situacao     String   @default("livre")
+  palletPaiId  Int?     // permite pallets empilhados
+
+  camara       Camara   @relation(fields: [camaraId], references: [id])
+  caixas       Caixa[]
+  palletPai    Pallet?  @relation("Empilhamento", fields: [palletPaiId], references: [id])
+  palletsFilho Pallet[] @relation("Empilhamento")
+}
+
+model ModeloCaixa {
+  id           Int     @id @default(autoincrement())
+  nome         String
+  largura      Float
+  profundidade Float
+  altura       Float
+  cor          String?
+
+  caixas       Caixa[]
+}
+
+model Caixa {
+  id        Int    @id @default(autoincrement())
+
+  palletId  Int
+  pallet    Pallet @relation(fields: [palletId], references: [id])
+
+  modeloId  Int?   // 👈 NOVO
+  modelo    ModeloCaixa? @relation(fields: [modeloId], references: [id])
+
+  largura   Float
+  profundidade Float
+  altura    Float
+
+  posX      Float
+  posY      Float
+  posZ      Float
+
+  caixaPaiId    Int?
+  caixaPai      Caixa? @relation("StackCaixa", fields: [caixaPaiId], references: [id])
+  caixasFilhas  Caixa[] @relation("StackCaixa")
+
+  itens     ItemCaixa[]
+
+  movimentacoesOrigem  Movimentacao[] @relation("origemCaixa")
+  movimentacoesDestino Movimentacao[] @relation("destinoCaixa")
+}
+
+model ItemCaixa {
+  id         Int @id @default(autoincrement())
+
+  caixaId    Int
+  produtoId  Int
+
+  quantidade Int
+
+  caixa    Caixa   @relation(fields: [caixaId], references: [id])
+  produto  Produto @relation(fields: [produtoId], references: [id])
+}
+
+model Movimentacao {
+  id         Int      @id @default(autoincrement())
+
+  produtoId  Int
+  quantidade Int
+  tipo       String
+
+  origemCaixaId  Int?
+  destinoCaixaId Int?
+
+  createdAt  DateTime @default(now())
+
+  produto Produto @relation(fields: [produtoId], references: [id])
+
+  origemCaixa  Caixa? @relation("origemCaixa", fields: [origemCaixaId], references: [id])
+  destinoCaixa Caixa? @relation("destinoCaixa", fields: [destinoCaixaId], references: [id])
+}

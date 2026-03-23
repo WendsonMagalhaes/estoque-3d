@@ -1,6 +1,7 @@
 "use client"
 
 import { useDraggable } from "@dnd-kit/core"
+import { GripVertical } from "lucide-react"
 
 export function PalletItem({
     pallet,
@@ -32,8 +33,7 @@ export function PalletItem({
     return (
         <div
             ref={setNodeRef}
-            onClick={() => onClick?.(pallet)}
-            className="absolute border rounded shadow flex items-center justify-center cursor-pointer"
+            className="absolute border rounded shadow flex flex-col items-center justify-center"
             style={{
                 ...style,
                 width: palletWidth,
@@ -44,16 +44,25 @@ export function PalletItem({
                 backgroundColor: cor,
             }}
         >
-            {/* Área de drag separada */}
+            {/* 🔥 HANDLE DE DRAG (só aqui arrasta) */}
             <div
                 {...listeners}
                 {...attributes}
-                className="w-full h-full flex items-center justify-center"
+                className="absolute top-1 right-1 cursor-grab active:cursor-grabbing"
             >
-                <span className="text-xs font-bold text-black">
-                    {pallet.codigo}
-                </span>
+                <GripVertical size={14} />
             </div>
+
+            {/* 📦 Código clicável */}
+            <span
+                className="text-xs font-bold text-black cursor-pointer"
+                onClick={(e) => {
+                    e.stopPropagation()
+                    onClick?.(pallet)
+                }}
+            >
+                {pallet.codigo}
+            </span>
         </div>
     )
 }

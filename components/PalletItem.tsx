@@ -32,8 +32,6 @@ export function PalletItem({
     return (
         <div
             ref={setNodeRef}
-            {...listeners}
-            {...attributes}
             onClick={() => onClick?.(pallet)}
             className="absolute border rounded shadow flex items-center justify-center cursor-pointer"
             style={{
@@ -46,9 +44,16 @@ export function PalletItem({
                 backgroundColor: cor,
             }}
         >
-            <span className="text-xs font-bold text-black">
-                {pallet.codigo}
-            </span>
+            {/* Área de drag separada */}
+            <div
+                {...listeners}
+                {...attributes}
+                className="w-full h-full flex items-center justify-center"
+            >
+                <span className="text-xs font-bold text-black">
+                    {pallet.codigo}
+                </span>
+            </div>
         </div>
     )
 }

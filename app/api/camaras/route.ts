@@ -8,9 +8,14 @@ export async function GET() {
     try {
         const camaras = await prisma.camara.findMany({
             include: {
-                pallets: true,
+                pallets: {
+                    include: {
+                        caixas: true, // 🔥 ESSENCIAL
+                    },
+                },
             },
         })
+
         return NextResponse.json(camaras)
     } catch (err) {
         console.error(err)
@@ -18,7 +23,7 @@ export async function GET() {
     }
 }
 
-// ✅ POST (🔥 FALTAVA ISSO)
+// ✅ POST
 export async function POST(req: Request) {
     try {
         const body = await req.json()
@@ -28,7 +33,7 @@ export async function POST(req: Request) {
                 nome: body.nome,
                 largura: body.largura,
                 profundidade: body.profundidade,
-                altura: body.altura, // ✅ ADICIONA ISSO
+                altura: body.altura,
             },
         })
 
